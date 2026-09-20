@@ -1,0 +1,30 @@
+generated: '2026-09-19'
+method: probed
+source: >-
+  Harvested from artifacts already in this repo (well-known/, security/, lifecycle/, conformance/) and live
+  probes of the conventional paths on grokandmon.com, 2026-09-19. Regime applicability is decided by the
+  Kin Score regime map, not here.
+signals: {}
+probed:
+- {url: 'https://grokandmon.com/accessibility', status: 200, result: spa-shell, note: 'homepage HTML, 401,896 bytes; no conformance report'}
+- {url: 'https://grokandmon.com/accessibility/vpat', status: 200, result: spa-shell}
+- {url: 'https://grokandmon.com/legal/subprocessors', status: 200, result: spa-shell}
+- {url: 'https://grokandmon.com/legal/dpa', status: 200, result: spa-shell}
+- {url: 'https://grokandmon.com/privacy/requests', status: 200, result: spa-shell}
+- {url: 'https://grokandmon.com/privacy', status: 200, result: spa-shell, note: 'no privacy policy page is served'}
+- {url: 'https://grokandmon.com/terms', status: 200, result: spa-shell, note: 'no terms page is served'}
+- {url: 'https://grokandmon.com/transparency', status: 200, result: spa-shell}
+- {url: 'https://grokandmon.com/security/sbom', status: 200, result: spa-shell}
+- {url: 'https://grokandmon.com/docs/data-residency', status: 200, result: spa-shell}
+- {url: 'https://grokandmon.com/ai/transparency', status: 200, result: spa-shell}
+- {url: 'https://grokandmon.com/legal/report-content', status: 200, result: spa-shell}
+- {url: 'https://grokandmon.com/security', status: 200, result: spa-shell}
+- {url: 'https://grokandmon.com/.well-known/security.txt', status: 200, result: spa-shell, note: 'application/json content-type header over an HTML body'}
+note: >-
+  No horizontal regulatory signal is published: no SBOM, support lifetime, accessibility conformance,
+  training-data summary, AI transparency statement, GPC statement, data-subject-request channel, subprocessor
+  list, data-residency statement, incident-notification commitment, age-assurance, notice-and-action,
+  transparency report or exit-assistance page. The site is a single-page app whose router answers every
+  path with the homepage, so each probe above is an HTTP 200 that carries none of the substance; the
+  a2a.html, art.html, social.html and trading.html sub-pages that do render are product pages. Absence is
+  the measurement.

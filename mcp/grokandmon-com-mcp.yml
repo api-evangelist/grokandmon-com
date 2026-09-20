@@ -1,0 +1,96 @@
+generated: '2026-09-19'
+method: probed
+status: published
+source: https://grokandmon.com/mcp/v1
+docs: https://grokandmon.com/a2a.html
+summary: >-
+  Grok & Mon operates ONE remote MCP server at https://grokandmon.com/mcp/v1 (the same path also answers at
+  /mcp), on the same host as its website and A2A endpoint. It speaks MCP protocol version 2025-06-18, answers
+  initialize and tools/list anonymously, and lists 22 tools - 11 reads over a real cannabis grow tent's IoT
+  sensors (environment, substrate moisture, light, growth stage, history, watering predictions, AI decision
+  log) and 11 actuator writes (light intensity and schedule, exhaust/intake/circulation fans, humidifier,
+  dehumidifier, heat mat, irrigation 10-150 ml, growth-stage transition, observation log), each with a real
+  inputSchema. GET on the endpoint returns a static descriptor document carrying the same tool list.
+  resources/list and prompts/list return -32601. THE CALL SURFACE IS A STUB: tools/call on the read-only
+  get_environment returned HTTP 200 with the text "Tool get_environment acknowledged. Connect to the agent
+  API for live execution." rather than sensor data, so the server enumerates tools but does not execute
+  them; live execution is routed to the /api/* origin, which answered 530 (Cloudflare Tunnel error)
+  throughout this pass. No write tool was invoked. Authorship is the provider's: the tool names are specific
+  to this one grow (Ecowitt GW1100 sensor, GDP Runtz strain) and match no shared platform fingerprint.
+deployment:
+  mode: remote
+  endpoint: https://grokandmon.com/mcp/v1
+  auth: none
+  verified: probed
+  note: >-
+    A hosted HTTPS endpoint an MCP client POSTs to directly; no stdio package, no npx/uvx install is
+    published anywhere (npm, PyPI and GitHub searched, 0 results). auth is "none" in the connection sense -
+    initialize, tools/list and tools/call needed no credential and no Mcp-Session-Id was issued - and no
+    OAuth metadata is served on the host (/.well-known/oauth-authorization-server and
+    /.well-known/oauth-protected-resource both return the SPA shell). The agent card advertises x402
+    micropayment on the A2A surface; no 402 challenge was observed on the MCP surface, whose tools/call
+    only acknowledges.
+servers:
+- id: ganjamon
+  name: GanjaMon MCP Server
+  endpoint: https://grokandmon.com/mcp/v1
+  alias_endpoint: https://grokandmon.com/mcp
+  transport: streamable-http
+  http_methods: [GET, POST]
+  auth: none
+  status: live-descriptor-only
+  probe:
+    fetched: '2026-09-19'
+    initialize:
+      http_status: 200
+      protocol_version: '2025-06-18'
+      result: '{"name":"GanjaMon MCP Server","version":"1.0.0","protocolVersion":"2025-06-18","capabilities":{"tools":{"listChanged":false}}}'
+      note: name/version sit at the top level of result rather than under serverInfo as the spec shapes it.
+    tools_list:
+      http_status: 200
+      content_type: application/json
+      tool_count: 22
+      file: mcp/grokandmon-com-mcp-tools.json
+    tools_call:
+      tool: get_environment
+      http_status: 200
+      result: '{"content":[{"type":"text","text":"Tool get_environment acknowledged. Connect to the agent API for live execution."}]}'
+      note: acknowledgement stub, not data; no actuator tool was called.
+    resources_list: {http_status: 404, error: '-32601 Method not found: resources/list'}
+    prompts_list: {http_status: 404, error: '-32601 Method not found: prompts/list'}
+    get_request: {http_status: 200, content_type: application/json, bytes: 7268, file: mcp/grokandmon-com-mcp-descriptor.json, note: 'static descriptor: name, version, protocolVersion, capabilities and the full tools[] list'}
+    cors: 'access-control-allow-origin: *; allow-methods GET, HEAD, POST, OPTIONS'
+  authorship: provider
+  tools:
+  - {name: get_environment, read_only: true, description: 'Read current temperature, humidity, VPD, and CO2 from grow tent sensors.', input_schema: '{}'}
+  - {name: get_substrate, read_only: true, description: 'Read soil moisture levels from Ecowitt GW1100 sensor.', input_schema: '{}'}
+  - {name: get_light_levels, read_only: true, description: 'Get current light status, schedule, and intensity.', input_schema: '{}'}
+  - {name: capture_image, read_only: true, description: 'Capture a photo from the grow tent webcam.', input_schema: 'camera_id: string (default main)'}
+  - {name: set_light_intensity, read_only: false, description: 'Set grow light intensity (0-100%).', input_schema: 'intensity_percent: integer 0-100 (required)'}
+  - {name: set_light_schedule, read_only: false, description: 'Set light on/off schedule (e.g. 18/6 veg, 12/12 flower).', input_schema: 'hours_on: integer, hours_off: integer (both required)'}
+  - {name: control_exhaust, read_only: false, description: 'Set exhaust fan speed (0-100%) for air exchange.', input_schema: 'speed_percent: integer 0-100 (required)'}
+  - {name: control_intake, read_only: false, description: 'Set intake fan speed (0-100%).', input_schema: 'speed_percent: integer 0-100 (required)'}
+  - {name: control_humidifier, read_only: false, description: 'Turn humidifier on or off.', input_schema: 'state: enum [on, off] (required)'}
+  - {name: control_circulation_fan, read_only: false, description: 'Control internal circulation fan.', input_schema: 'speed_percent: integer 0-100 (required)'}
+  - {name: trigger_irrigation, read_only: false, description: 'Water the plant (10-150ml, calibrated pump).', input_schema: 'amount_ml: integer 10-150 (required)'}
+  - {name: get_growth_stage, read_only: true, description: 'Get current growth stage.', input_schema: '{}'}
+  - {name: set_growth_stage, read_only: false, description: 'Transition to a new growth stage.', input_schema: 'stage: string, reason: string (both required)'}
+  - {name: get_history, read_only: true, description: 'Get historical sensor data for trend analysis.', input_schema: 'sensor_type: string, hours: integer (default 24)'}
+  - {name: log_observation, read_only: false, description: 'Log a visual observation about plant health.', input_schema: 'observation: string (required)'}
+  - {name: get_strain_profile, read_only: true, description: 'Get strain-specific parameters for GDP Runtz.', input_schema: '{}'}
+  - {name: control_heat_mat, read_only: false, description: 'Control seedling heat mat.', input_schema: 'state: enum [on, off] (required)'}
+  - {name: control_dehumidifier, read_only: false, description: 'Turn dehumidifier on or off.', input_schema: 'state: enum [on, off] (required)'}
+  - {name: get_watering_predictions, read_only: true, description: 'Get AI-predicted next watering times.', input_schema: 'limit: integer (default 5)'}
+  - {name: get_ai_decision_history, read_only: true, description: 'Get recent AI decision log with reasoning.', input_schema: 'limit: integer (default 10)'}
+  - {name: get_watering_history, read_only: true, description: 'Get watering event history.', input_schema: 'limit: integer (default 10)'}
+  - {name: get_hourly_summary, read_only: true, description: 'Get aggregated hourly sensor averages.', input_schema: 'hours: integer (default 48)'}
+tool_count: 22
+read_tools: 11
+write_tools: 11
+crosswalk: none - the provider publishes no OpenAPI to bind these tools to; the /api/* REST origin the tools defer to answered 530 and publishes no contract.
+x-evidence:
+  fetched: '2026-09-19'
+  url: https://grokandmon.com/mcp/v1
+  tools_list_http_status: 200
+  content_type: application/json
+  server: cloudflare

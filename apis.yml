@@ -1,18 +1,105 @@
 aid: grokandmon-com
 name: Grok & Mon
-description: 'Grok & Mon is a company surfaced via the API Evangelist harvest backlog (source: a2a-registry)
-  and added to the network as a stub for full-pipeline profiling.'
+description: >-
+  Grok & Mon operates GanjaMon AI, an autonomous ERC-8004 agent (agent #4 on Monad) that runs a real
+  cannabis grow tent through IoT sensors and actuators, aggregates trading signals from nine on-chain and
+  social sources, and sells its outputs to other agents. Its published surface is agent-native rather than
+  REST-first: an A2A 0.3.0 agent card at /.well-known/agent-card.json with seven skills, a JSON-RPC
+  endpoint at /a2a/v1, three ACP REST endpoints, a remote MCP server at /mcp/v1 listing 22 grow-tent tools,
+  and an x402 pricing document quoting per-call USDC prices with a 100-request/day free tier. It publishes
+  no OpenAPI, SDK, security.txt or status page, and its /api/* REST origin was unreachable (HTTP 530) when
+  profiled.
 url: https://raw.githubusercontent.com/api-evangelist/grokandmon-com/refs/heads/main/apis.yml
+image: https://grokandmon.com/assets/GANJA_MON_brand_logo_powered_by_grok.png
 x-type: company
 x-source: harvest:a2a-registry
-x-tier: stub
-x-tier-reason: harvest
+x-tier: profiled
+x-tier-reason: 'Full local enrichment pass 2026-09-19 (was: stub / harvest).'
 specificationVersion: '0.20'
 created: '2026-09-19'
 modified: '2026-09-19'
 tags:
-- Company
-apis: []
+- AI Agents
+- A2A
+- MCP
+- x402
+- Agent Commerce
+- Cannabis
+- IoT
+- Cryptocurrency
+- Monad
+- Trading Signals
+- Generative Art
+apis:
+- aid: grokandmon-com:ganjamon-a2a-agent
+  name: GanjaMon AI A2A Agent
+  description: >-
+    Agent2Agent (A2A) protocol surface: an agent card served from https://grokandmon.com/.well-known/agent-card.json
+    (protocolVersion 0.3.0, JSONRPC transport, version 2.1.0, graded conformant on shape) advertising seven
+    skills - alpha-scan, cultivation-status, signal-feed, trade-execution, agent-validate, x402-oracle and
+    art-studio - priced per call in USDC via x402 (EIP-3009) with a 100-request/day free tier. The JSON-RPC
+    endpoint at https://grokandmon.com/a2a/v1 answers message/send, tasks/get, tasks/cancel and agent/info;
+    three ACP REST endpoints (/a2a/v1/acp/grow, /signals, /oracle) answer GET with schema/sample payloads.
+    A different, older card (v0.1.0, three skills) is still served at the legacy /.well-known/agent.json.
+  humanURL: https://grokandmon.com/a2a.html
+  baseURL: https://grokandmon.com/a2a/v1
+  tags:
+  - A2A
+  - agent-native
+  - x402
+  - ERC-8004
+  properties:
+  - type: AgentCard
+    url: a2a/grokandmon-com-a2a.yml
+  - type: AgentCard
+    name: GanjaMon AI agent card (provider-hosted)
+    url: https://grokandmon.com/.well-known/agent-card.json
+  - type: Documentation
+    url: https://grokandmon.com/a2a.html
+  - type: Pricing
+    url: https://grokandmon.com/.well-known/x402-pricing.json
+- aid: grokandmon-com:ganjamon-mcp-server
+  name: GanjaMon MCP Server
+  description: >-
+    Remote Model Context Protocol server at https://grokandmon.com/mcp/v1 (also answers at /mcp; protocol
+    version 2025-06-18, server version 1.0.0). initialize and tools/list answer anonymously with 22 tools -
+    11 sensor reads (environment, substrate moisture, light, growth stage, history, watering predictions, AI
+    decision log) and 11 actuator writes (lights, fans, humidifier, dehumidifier, heat mat, irrigation,
+    growth-stage transition, observation log) - each with a real inputSchema. tools/call returned an
+    acknowledgement stub rather than executing when probed; resources/list and prompts/list are not
+    implemented. No credential and no OAuth metadata.
+  humanURL: https://grokandmon.com/a2a.html
+  baseURL: https://grokandmon.com/mcp/v1
+  tags:
+  - MCP
+  - agent-native
+  - IoT
+  properties:
+  - type: MCPServer
+    url: mcp/grokandmon-com-mcp.yml
+  - type: MCPServer
+    name: GanjaMon MCP endpoint (Streamable HTTP)
+    url: https://grokandmon.com/mcp/v1
+- aid: grokandmon-com:grokandmon-rest-api
+  name: Grok & Mon REST API
+  description: >-
+    The JSON REST origin under https://grokandmon.com/api/ that the website, the MCP tools and the ACP
+    endpoints defer to for live data: sensor history, hourly aggregates, AI decision history, plant
+    progress, webcam status and image, token metrics, comments, and the x402-priced art-studio and oracle
+    endpoints (/api/x402/art/*, /api/x402/oracle, /api/x402/grow-alpha, /api/x402/daily-vibes,
+    /api/x402/sensor-snapshot) named in the pricing document. No contract is published for it, and every
+    path answered HTTP 530 (Cloudflare Tunnel error to an origin the provider's own payloads call the
+    "Chromebook API") throughout this pass, so the paths recorded here come from the provider's page
+    scripts and pricing document, not from a response.
+  humanURL: https://grokandmon.com/
+  baseURL: https://grokandmon.com/api
+  tags:
+  - REST
+  - x402
+  - IoT
+  properties:
+  - type: Pricing
+    url: https://grokandmon.com/.well-known/x402-pricing.json
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
@@ -21,3 +108,42 @@ maintainers:
 common:
 - type: Website
   url: https://grokandmon.com/
+- type: Documentation
+  url: https://grokandmon.com/a2a.html
+- type: Pricing
+  url: https://grokandmon.com/.well-known/x402-pricing.json
+- type: X
+  url: https://x.com/ganjamonai
+- type: Telegram
+  url: https://t.me/ganjamonai
+- type: AgentCard
+  url: a2a/grokandmon-com-a2a.yml
+- type: MCPServer
+  url: mcp/grokandmon-com-mcp.yml
+- type: WellKnown
+  url: well-known/grokandmon-com-well-known.yml
+- type: LLMsTxt
+  url: llms/grokandmon-com-llms.txt
+- type: Authentication
+  url: authentication/grokandmon-com-authentication.yml
+- type: Conventions
+  url: conventions/grokandmon-com-conventions.yml
+- type: ErrorCatalog
+  url: errors/grokandmon-com-problem-types.yml
+- type: RateLimits
+  url: rate-limits/grokandmon-com-rate-limits.yml
+- type: Plans
+  url: plans/grokandmon-com-plans-pricing.yml
+- type: Conformance
+  url: conformance/grokandmon-com-conformance.yml
+- type: Lifecycle
+  url: lifecycle/grokandmon-com-lifecycle.yml
+- type: DomainSecurity
+  url: security/grokandmon-com-domain-security.yml
+- type: RegulatoryPosture
+  url: regulatory/grokandmon-com-regulatory-posture.yml
+x-enrichment:
+  date: '2026-09-19'
+  status: enriched
+  artifacts_added: 20
+  pass: local-v3

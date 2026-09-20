@@ -1,0 +1,41 @@
+generated: '2026-09-19'
+method: probed
+source:
+- https://grokandmon.com/.well-known/agent-card.json
+- https://grokandmon.com/.well-known/agent.json
+- https://grokandmon.com/mcp/v1
+- https://grokandmon.com/a2a.html
+summary: >-
+  Grok & Mon publishes no versioning policy, no deprecation policy, no Sunset or Deprecation headers, no
+  SLA and no status page. What it does publish is version numbers on its surfaces, and they disagree: the
+  canonical agent card is version 2.1.0, the legacy agent.json still served at the pre-0.3 path is 0.1.0
+  (a different document, three skills, apiKey auth), the a2a.html page shows "v0.1.0", the MCP server
+  reports 1.0.0, and the ACP payloads carry version 2.1.0. The A2A path is versioned in the URL
+  (/a2a/v1, /mcp/v1). The only availability signal is a2aregistry.org's health check (uptime 100%,
+  avg 1,262 ms on 2026-09-20) and, in the other direction, the /api/* REST origin answering HTTP 530
+  Cloudflare Tunnel error with Retry-After: 120 throughout this pass. No StatusPage or Deprecation pointer
+  is emitted.
+versioning:
+  scheme: path-versioned endpoints (/a2a/v1, /mcp/v1); semantic version strings on the card and server
+  current:
+    agent_card: 2.1.0
+    agent_card_legacy_path: 0.1.0
+    mcp_server: 1.0.0
+    a2a_protocol: '0.3.0'
+    mcp_protocol: '2025-06-18'
+  policy: none published
+deprecation:
+  policy: none published
+  headers: none observed (no Deprecation, Sunset or Link rel=deprecation on any response)
+  deprecated_operations: []
+  note: >-
+    The legacy /.well-known/agent.json is still served with a stale 0.1.0 card rather than redirected or
+    replaced, which is the closest thing to an un-retired surface this provider has.
+status_page: none
+sla: none published
+availability_observed:
+  - {surface: 'https://grokandmon.com/api/sensors/history', status: 530, note: 'Cloudflare Tunnel error, Retry-After: 120; every /api/* path including /api/x402/art/gallery answered the same, 2026-09-19'}
+  - {surface: 'https://grokandmon.com/brain.html', status: 530}
+  - {surface: 'https://grokandmon.com/mcp/v1', status: 200}
+  - {surface: 'https://grokandmon.com/a2a/v1', status: 200}
+  - {surface: 'a2aregistry.org health check', note: 'is_healthy true, uptime_percentage 100.0, avg_response_time_ms 1262, last_health_check 2026-09-20T01:29Z'}

@@ -1,0 +1,45 @@
+generated: '2026-09-19'
+method: probed
+source: https://grokandmon.com/.well-known/x402-pricing.json
+docs:
+- https://grokandmon.com/a2a.html
+- https://grokandmon.com/.well-known/agent-card.json
+file: ../well-known/grokandmon-com-x402-pricing.json
+plan_count: 18
+currency: USDC
+model: pay-per-call in USDC via x402 (EIP-3009) on Monad testnet (chainId 10143) or Base (8453); no subscription, no account, no card payments; 100 requests/day free
+summary: >-
+  Grok & Mon publishes a machine-readable pricing document (version "x402-v1") rather than tiers. Every
+  A2A request defaults to $0.001 USDC; four A2A skills, six art-studio endpoints and four oracle endpoints
+  carry their own price. The one recurring allowance is free: 100 requests per day without payment, after
+  which "x402 payment unlocks priority access". Prices are verbatim from the document on 2026-09-19. The
+  priced REST endpoints live under /api/x402/, an origin that answered HTTP 530 throughout this pass, so
+  none was purchasable at the time.
+free_tier:
+  requests_per_day: 100
+  description: 'Free tier: 100 requests/day without payment. x402 payment unlocks priority access.'
+plans:
+- {id: default, name: Default A2A request fee, price: 0.001, currency: USDC, period: per request, surface: 'POST https://grokandmon.com/a2a/v1'}
+- {id: alpha-scan, name: Alpha Scan, price: 0.001, currency: USDC, period: per request, surface: A2A skill, description: 9-source signal aggregation with confluence scoring}
+- {id: cultivation-status, name: Cultivation Status, price: 0.0005, currency: USDC, period: per request, surface: A2A skill, description: Live IoT sensor data from grow tent}
+- {id: signal-feed, name: Signal Feed, price: 0.001, currency: USDC, period: per request, surface: A2A skill, description: Real-time scored signals with tier filtering}
+- {id: trade-execution, name: Trade Execution, price: 0.005, currency: USDC, period: per request, surface: A2A skill, description: Queue trade intent for human approval}
+- {id: art-commission, name: Art Studio - commission, price: 0.25, currency: USDC, period: per piece, surface: 'POST /api/x402/art/commission', accepts: 'prompt (string), image_b64 (optional), style (optional)'}
+- {id: art-pfp, name: Art Studio - pfp, price: 0.10, currency: USDC, period: per piece, surface: 'POST /api/x402/art/pfp'}
+- {id: art-meme, name: Art Studio - meme, price: 0.05, currency: USDC, period: per piece, surface: 'POST /api/x402/art/meme'}
+- {id: art-ganjafy, name: Art Studio - ganjafy, price: 0.03, currency: USDC, period: per piece, surface: 'POST /api/x402/art/ganjafy', accepts: 'image_b64 (required), prompt (optional)'}
+- {id: art-banner, name: Art Studio - banner, price: 0.08, currency: USDC, period: per piece, surface: 'POST /api/x402/art/banner'}
+- {id: art-gallery, name: Art Studio - gallery, price: 0, currency: USDC, period: free, surface: 'GET /api/x402/art/gallery'}
+- {id: oracle-premium, name: Oracle - premium, price: 0.15, currency: USDC, period: per call, surface: /api/x402/oracle, cache_ttl_seconds: 300, description: Full 5-domain AI synthesis in Rasta patois (Grok AI)}
+- {id: oracle-grow-alpha, name: Oracle - grow-alpha, price: 0.05, currency: USDC, period: per call, surface: /api/x402/grow-alpha, cache_ttl_seconds: 180}
+- {id: oracle-daily-vibes, name: Oracle - daily-vibes, price: 0.02, currency: USDC, period: per call, surface: /api/x402/daily-vibes, cache_ttl_seconds: 600}
+- {id: oracle-sensor-snapshot, name: Oracle - sensor-snapshot, price: 0.005, currency: USDC, period: per call, surface: /api/x402/sensor-snapshot, cache_ttl_seconds: 30}
+- {id: acp-grow, name: ACP grow endpoint, price: 0, currency: USDC, period: free, surface: 'GET /a2a/v1/acp/grow', note: 'response body says pricing: free'}
+- {id: acp-signals, name: ACP signals endpoint, price: 0, currency: USDC, period: free, surface: 'GET /a2a/v1/acp/signals', note: 'response body says pricing: free'}
+- {id: acp-oracle, name: ACP oracle endpoint, price: 0, currency: USDC, period: free, surface: 'GET /a2a/v1/acp/oracle'}
+supported_networks:
+- {network: monad, chainId: 10143, currency: USDC, payTo: 'eip155:10143:0x734B0e337bfa7d4764f4B806B4245Dd312DdF134'}
+- {network: base, chainId: 8453, currency: USDC, payTo: 'eip155:8453:0x734B0e337bfa7d4764f4B806B4245Dd312DdF134'}
+not_priced:
+- {id: agent-validate, note: 'an A2A skill on the card with no entry in the pricing document; presumably the default fee applies, which is not stated'}
+enterprise: none

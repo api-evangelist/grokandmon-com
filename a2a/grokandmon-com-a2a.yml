@@ -1,0 +1,182 @@
+generated: '2026-09-19'
+method: probed
+source: https://grokandmon.com/.well-known/agent-card.json
+checked: '2026-09-19'
+discovery:
+  path: /.well-known/agent-card.json
+  canonical: true
+  host: grokandmon.com
+  note: >-
+    Served from the registrable domain grokandmon.com (Cloudflare-fronted, HTTP 200, application/json,
+    6,370 bytes) - the exact URL the a2aregistry.org record this repo was harvested from names as
+    wellKnownURI. The legacy /.well-known/agent.json path ALSO answers 200 application/json but with a
+    DIFFERENT, older document (name "GanjaMon", version 0.1.0, three skills, apiKey securitySchemes),
+    saved verbatim as grokandmon-com-agent-card-legacy.json for evidence. A third variant is served by
+    GET /a2a, GET /a2a/v1 and the JSON-RPC method agent/info (five skills, a different payTo address).
+    www.grokandmon.com does not resolve (NXDOMAIN). Every other /.well-known/* path on the apex,
+    including a random negative control, returns the 400,958-byte homepage HTML with an application/json
+    content-type header - an SPA catch-all - so the two card paths and x402-pricing.json are the only
+    real documents under /.well-known/ (see well-known/grokandmon-com-well-known.yml).
+conformance:
+  spec: A2A 1.0.0
+  grade: conformant
+  grade_basis: >-
+    All three hard checks pass: capabilities is an OBJECT ({streaming: false, pushNotifications: false,
+    stateTransitionHistory: true, x402Payments: true}), protocolVersion is present ("0.3.0"), and skills
+    is an ARRAY of seven entries each carrying id, name, description, tags and examples. The optional
+    fields that separate conformant from near-conformant are all present: preferredTransport ("JSONRPC"),
+    defaultInputModes and defaultOutputModes ([application/json, text/plain]). The card also carries
+    provider, iconUrl, documentationUrl, version and supportsAuthenticatedExtendedCard. The grade is about
+    the document's shape; the deviations below record the non-spec vocabulary around that shape and the
+    inconsistencies between the four skill inventories this provider publishes.
+  protocol_version: '0.3.0'
+  preferred_transport: JSONRPC
+  deviations:
+    - id: skill-count-contradicts-description
+      severity: soft
+      detail: >-
+        The description says "23 A2A skills including grow oracle, plant vision, alpha scanning, on-chain
+        grow log, and rasta translation"; skills[] carries 7 (alpha-scan, cultivation-status, signal-feed,
+        trade-execution, agent-validate, x402-oracle, art-studio). None of the five named in the prose
+        appears as a skill id. The a2a.html page lists a fifth inventory under "Registered Skills"
+        (oracle, grow-advisor, alpha-signals, grow-monitor, rasta-wisdom), the /a2a and /a2a/v1 GET
+        variant carries 5 skills and the legacy agent.json carries 3.
+    - id: additionalInterfaces-non-spec-transports
+      severity: soft
+      detail: >-
+        additionalInterfaces declares transports "MCP" (https://grokandmon.com/mcp/v1) and "REST" (three
+        /a2a/v1/acp/* endpoints). A2A's TransportProtocol values are JSONRPC, GRPC and HTTP+JSON; an
+        A2A client reading the field cannot bind either. The MCP and ACP surfaces are real (probed
+        below) - this is a vocabulary problem, not a liveness one.
+    - id: capabilities-non-spec-key
+      severity: soft
+      detail: >-
+        capabilities carries x402Payments: true, which is not an AgentCapabilities field, and declares
+        no extensions[] - the a2a-x402 extension URI that other x402 agents use to signal payment is not
+        used, so a spec client has no conformant way to learn that calls are priced.
+    - id: no-securitySchemes
+      severity: soft
+      detail: >-
+        The canonical card declares no securitySchemes and no security. Payment is the gate: the
+        top-level x402 block (non-spec) and the a2a.html page describe a PAYMENT-SIGNATURE header carrying
+        an EIP-3009 USDC transferWithAuthorization, and the endpoint's CORS policy allows X-Payment,
+        X-402-Payment, X-Payment-Address, X-Payment-Amount, X-Payment-Token and X-Payment-Network. The
+        legacy agent.json instead declares apiKey in the Authorization header.
+    - id: payTo-differs-between-card-variants
+      severity: informational
+      detail: >-
+        The well-known card, x402-pricing.json and the a2a.html "Owner" field all name
+        eip155:10143:0x734B0e337bfa7d4764f4B806B4245Dd312DdF134; the /a2a, /a2a/v1 and agent/info variant
+        names eip155:10143:0x794c94f1b5E455c1dBA27BB28C6085dB0FE544F9. A payer following the JSON-RPC
+        surface pays a different address than one following the well-known card.
+    - id: network-inconsistency-monad-vs-base
+      severity: informational
+      detail: >-
+        The card's x402 block says network "monad", chainId 10143 (Monad testnet); the x402-oracle skill
+        description says "Accepts USDC on Base"; a2a.html says "USDC transferred on Base"; the pricing
+        document lists both monad 10143 and base 8453 under supportedNetworks with the same payTo.
+    - id: docs-describe-pre-0.3-methods
+      severity: informational
+      detail: >-
+        a2a.html says "Methods include tasks/send, tasks/get, and tasks/cancel. Agents discover each
+        other via /.well-known/agent.json" - the pre-0.3 method and path names. The live endpoint's own
+        error data lists message/send, tasks/get, tasks/cancel and agent/info.
+    - id: non-spec-top-level-keys
+      severity: informational
+      detail: x402 is not an A2A field; a strict A2A parser ignores it.
+    - id: registry-task-conformance-failed
+      severity: hard-in-practice
+      detail: >-
+        a2aregistry.org's own record (id 25ec42b7-c987-4e23-a9d1-bc231c4e7292, checked 2026-09-20T00:58Z)
+        marks card conformance true but task_conformance {category: BAD_RESPONSE, passed: false}, with the
+        maintainer note "Agent responds but the response shape is missing required A2A fields. Standard
+        A2A SDK clients cannot parse the response." This pass did not exercise message/send (every skill
+        is priced) and cannot independently confirm or refute that.
+    - id: endpoint-answers-jsonrpc
+      severity: positive
+      detail: >-
+        POST https://grokandmon.com/a2a/v1 is a live JSON-RPC 2.0 endpoint: tasks/get without a taskId
+        returned HTTP 200 {"error":{"code":-32602,"message":"Invalid params: taskId required"}}; an
+        unknown method returned HTTP 404 with -32601 and data.available [message/send, tasks/get,
+        tasks/cancel, agent/info]; agent/info returned the five-skill card variant. The three ACP REST
+        endpoints answer GET 200 with sample/schema payloads whose _note says live data comes from the
+        "Chromebook API" - the /api/* origin, which answered 530 (Cloudflare Tunnel error) throughout.
+    - id: iconUrl-5mb
+      severity: informational
+      detail: iconUrl is a 5,537,118-byte PNG (HTTP 200, image/png).
+card:
+  name: GanjaMon AI
+  description: >-
+    The only ERC-8004 agent with roots in the physical world. Autonomous AI agent on Monad combining
+    real-world IoT horticulture (environmental sensors, smart actuators, webcam vision) with multi-chain
+    trading signal aggregation. 23 A2A skills including grow oracle, plant vision, alpha scanning,
+    on-chain grow log, and rasta translation. Supports A2A JSON-RPC, x402 micropayments, and ACP task
+    management.
+  url: https://grokandmon.com/a2a/v1
+  version: 2.1.0
+  protocol_version: '0.3.0'
+  preferred_transport: JSONRPC
+  documentation_url: https://grokandmon.com
+  provider: {organization: Grok & Mon, url: 'https://grokandmon.com'}
+  default_input_modes: [application/json, text/plain]
+  default_output_modes: [application/json, text/plain]
+  capabilities: {streaming: false, pushNotifications: false, stateTransitionHistory: true, x402Payments: true}
+  security_schemes: none-declared
+  x402: {payTo: 'eip155:10143:0x734B0e337bfa7d4764f4B806B4245Dd312DdF134', currency: USDC, network: monad, chainId: 10143, priceUSD: '0.001', pricingUrl: 'https://grokandmon.com/.well-known/x402-pricing.json', freeTier: {requestsPerDay: 100}}
+  supports_authenticated_extended_card: false
+  skills: 7
+  file: grokandmon-com-agent-card.json
+  sha256: 108955b84eeefcf53924be935204f03fc6aebc64a190f72afc1b54f6b698fbf9
+skills:
+  - {id: alpha-scan, name: Alpha Scan, price: '$0.001 USDC (x402-pricing.json)', tags: 5, examples: 3}
+  - {id: cultivation-status, name: Cultivation Status, price: '$0.0005 USDC', tags: 4, examples: 3, acp_endpoint: 'GET https://grokandmon.com/a2a/v1/acp/grow (free, sample payload)'}
+  - {id: signal-feed, name: Signal Feed, price: '$0.001 USDC', tags: 4, examples: 3, acp_endpoint: 'GET https://grokandmon.com/a2a/v1/acp/signals (free, sample payload)'}
+  - {id: trade-execution, name: Trade Execution (Approval), price: '$0.005 USDC', tags: 3, examples: 2, note: 'queues a trade intent for human approval via Telegram; no auto-execution; >$500 needs explicit confirmation'}
+  - {id: agent-validate, name: Agent Validate, price: 'not listed in x402-pricing.json', tags: 6, examples: 3}
+  - {id: x402-oracle, name: x402 Digital Oracle, price: '$0.15 / $0.05 / $0.02 / $0.005 USDC by tier', tags: 6, examples: 3, rest_endpoints: ['/api/x402/oracle', '/api/x402/grow-alpha', '/api/x402/daily-vibes', '/api/x402/sensor-snapshot'], rest_status: 'the /api/* origin answered 530 throughout this pass'}
+  - {id: art-studio, name: GanjaMon Art Studio, price: '$0.25 / $0.10 / $0.05 / $0.03 / $0.08 USDC by mode; gallery free', tags: 8, examples: 5, rest_endpoints: ['/api/x402/art/commission', '/api/x402/art/pfp', '/api/x402/art/meme', '/api/x402/art/ganjafy', '/api/x402/art/banner', '/api/x402/art/gallery'], rest_status: 'GET /api/x402/art/gallery answered 530'}
+legacy_card:
+  path: /.well-known/agent.json
+  http_status: 200
+  content_type: application/json
+  bytes: 2332
+  file: grokandmon-com-agent-card-legacy.json
+  name: GanjaMon
+  version: 0.1.0
+  skills: 3
+  security_schemes: {apiKey: {type: apiKey, name: Authorization, in: header}}
+  note: A distinct, older document - not a copy of the canonical card. Recorded for evidence; the canonical card is the graded one.
+endpoint_liveness:
+  url: https://grokandmon.com/a2a/v1
+  fetched: '2026-09-19'
+  get: 'HTTP 200 application/json - returns the five-skill card variant (identical body at /a2a)'
+  post_tasks_get: 'HTTP 200 {"jsonrpc":"2.0","id":1,"error":{"code":-32602,"message":"Invalid params: taskId required"}}'
+  post_unknown_method: 'HTTP 404 {"error":{"code":-32601,"message":"Method not found: bogus/method","data":{"available":["message/send","tasks/get","tasks/cancel","agent/info"]}}}'
+  post_agent_info: 'HTTP 200 - five-skill card variant'
+  message_send: not-exercised (priced skills; this pass does not pay)
+  acp_rest:
+    - {url: 'https://grokandmon.com/a2a/v1/acp/grow', status: 200, note: 'skillId cultivation-status, sensors all null, "_note: Live sensor data from Chromebook API. This serves the schema."'}
+    - {url: 'https://grokandmon.com/a2a/v1/acp/signals', status: 200, note: 'skillId signal-feed, two SAMPLE assets, "_note: Sample data. Live signals from Chromebook API."'}
+    - {url: 'https://grokandmon.com/a2a/v1/acp/oracle', status: 200, note: 'all-zero sensor fields, "_note: Live data available from Chromebook API"'}
+  cors: 'access-control-allow-headers: Content-Type, X-Payment, X-402-Payment, X-Payment-Address, X-Payment-Amount, X-Payment-Token, X-Payment-Network'
+registry_listings:
+  - registry: a2aregistry.org
+    agent_id: 25ec42b7-c987-4e23-a9d1-bc231c4e7292
+    url: https://a2aregistry.org/api/agents?search=GanjaMon
+    note: >-
+      The source of this harvest - 1 agent, GanjaMon AI, author Grok & Mon, wellKnownURI
+      https://grokandmon.com/.well-known/agent-card.json, created 2026-02-27, is_healthy true,
+      uptime_percentage 100.0, avg_response_time_ms 1262, conformance true, task_conformance
+      {category BAD_RESPONSE, passed false} (fetched 2026-09-19).
+  - registry: 8004scan.io
+    url: https://8004scan.io/agents/monad/4
+    note: 'ERC-8004 agent #4 on Monad; page answered HTTP 200 (title "GanjaMon | 8004scan"). The card and pricing document both carry agentId 4.'
+x-evidence:
+  fetched: '2026-09-19'
+  url: https://grokandmon.com/.well-known/agent-card.json
+  http_status: 200
+  content_type: application/json
+  bytes: 6370
+  server: cloudflare
+  legacy_path: {url: 'https://grokandmon.com/.well-known/agent.json', http_status: 200, note: 'a different, older document (see legacy_card)'}
+  negative_control: {url: 'https://grokandmon.com/.well-known/grokandmon-negative-control-7f3ab91c.json', http_status: 200, note: 'returns the homepage HTML shell with an application/json content-type - the two card paths were accepted because their bodies parse as JSON objects with AgentCard shape, not because they returned 200'}

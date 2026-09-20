@@ -1,0 +1,83 @@
+generated: '2026-09-19'
+method: probed
+source:
+- https://grokandmon.com/.well-known/agent-card.json
+- https://grokandmon.com/mcp/v1
+- https://grokandmon.com/a2a/v1
+- https://grokandmon.com/a2a.html
+summary: >-
+  Grok & Mon publishes no conventions document; everything below is read from its served agent card, MCP
+  descriptor, pricing document, protocol page and the JSON-RPC responses observed. Both machine surfaces
+  are JSON-RPC 2.0 over HTTPS POST with the standard error envelope. There is no idempotency mechanism, no
+  pagination (the MCP read tools take a limit/hours argument and return one page), no field expansion, no
+  request-id header, no documented reversal for any write, and the one safety mechanism that exists -
+  trade intents queue for human approval on Telegram instead of executing - is a human gate, not an API
+  primitive. The MCP actuator tools that would move real hardware (irrigation, fans, lights) currently
+  return an acknowledgement stub rather than executing, so the write surface an agent can reach today is
+  nominal.
+authentication:
+  style: none on MCP; x402 micropayment (PAYMENT-SIGNATURE header, EIP-3009 USDC) on A2A beyond a 100/day free tier
+  ref: authentication/grokandmon-com-authentication.yml
+idempotency:
+  coverage: none
+  header: null
+  scope: []
+  note: >-
+    No Idempotency-Key or equivalent on any surface. A2A message/send returns a persistent task id (per the
+    trade-execution skill description) that can be polled with tasks/get, but nothing deduplicates a
+    re-sent message. MCP tools/call has no replay protection.
+dry_run_mode:
+  supported: false
+  note: 'No dry-run, simulate or preview flag on any tool or method.'
+reversibility:
+  grade: none
+  write_surfaces:
+  - operation: 'A2A skill trade-execution (message/send)'
+    reversal: 'tasks/cancel exists in the endpoint''s method list; whether it withdraws a queued trade intent is not documented'
+    window: unstated
+    docs: https://grokandmon.com/.well-known/agent-card.json
+    note: 'The skill says "Queue trade intents for operator approval via Telegram. No auto-execution. High-risk trades (>$500) require explicit confirmation." - a pre-commit human gate, not a reversal.'
+  - operation: 'MCP trigger_irrigation (10-150 ml)'
+    reversal: none - water delivered to a plant cannot be undone
+    window: n/a
+  - operation: 'MCP set_light_intensity / set_light_schedule / control_exhaust / control_intake / control_circulation_fan / control_humidifier / control_dehumidifier / control_heat_mat'
+    reversal: 'no undo; the same tool can be called again with a prior value, but no tool returns the prior state to restore'
+    window: unstated
+  - operation: 'MCP set_growth_stage'
+    reversal: 'no undo; stage transition requires a reason string; reversibility not documented'
+    window: unstated
+  - operation: 'MCP log_observation'
+    reversal: none - append-only log with no delete tool
+  - operation: 'x402 art-studio purchases (POST /api/x402/art/*)'
+    reversal: 'no refund path documented; on-chain USDC micropayments are final by construction'
+    window: unstated
+    docs: https://grokandmon.com/.well-known/x402-pricing.json
+  note: >-
+    No reversal window is stated anywhere, so nothing here can grade above none. tasks/cancel is the one
+    candidate and its semantics are unpublished.
+pagination:
+  style: none
+  note: 'MCP read tools accept limit (default 5-10) or hours (default 24-48) arguments and return a single result; A2A skills have no cursor.'
+field_expansion: none
+metadata: none
+request_id:
+  header: none observed
+  note: 'JSON-RPC id echoes the caller''s id; no server-generated request id header.'
+versioning:
+  style: path (/a2a/v1, /mcp/v1); semantic version strings on card (2.1.0) and MCP server (1.0.0)
+  ref: lifecycle/grokandmon-com-lifecycle.yml
+error_envelope:
+  shape: JSON-RPC 2.0 error object {code, message, data?}
+  observed:
+  - {surface: /a2a/v1, http: 200, code: -32602, message: 'Invalid params: taskId required'}
+  - {surface: /a2a/v1, http: 404, code: -32601, message: 'Method not found: bogus/method', data: '{"available":["message/send","tasks/get","tasks/cancel","agent/info"]}'}
+  - {surface: /mcp/v1, http: 404, code: -32601, message: 'Method not found: resources/list'}
+  note: 'Unknown methods return HTTP 404 with the JSON-RPC error rather than 200, which breaks clients that treat non-2xx as transport failure.'
+  ref: errors/grokandmon-com-problem-types.yml
+rate_limit_signaling:
+  headers: none observed
+  ref: rate-limits/grokandmon-com-rate-limits.yml
+payments:
+  protocol: x402 (EIP-3009 USDC, CAIP-10 payTo)
+  header: PAYMENT-SIGNATURE (a2a.html); CORS also allows X-Payment, X-402-Payment, X-Payment-Address, X-Payment-Amount, X-Payment-Token, X-Payment-Network
+  challenge: 'HTTP 402 not observed in this pass'

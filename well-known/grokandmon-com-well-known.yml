@@ -1,0 +1,225 @@
+generated: '2026-09-19'
+method: probed
+source: Live GET probes of the named /.well-known/* path list on grokandmon.com and www.grokandmon.com, 2026-09-19
+  (UTC 2026-09-20T01:50Z). Every row below is a request that was actually issued; every status is the one returned.
+summary:
+  hosts_probed: 2
+  paths_probed: 21
+  documents_served: 3
+  hit_count: 3
+  path_echo_control: failed - SPA catch-all
+  note: 'grokandmon.com serves exactly three real documents under /.well-known/: the A2A agent card at the canonical
+    /.well-known/agent-card.json, a DIFFERENT older card at the legacy /.well-known/agent.json, and the provider-declared
+    x402-pricing.json the card points at. Every other named path - security.txt, OpenID/OAuth discovery (including
+    the RFC 9728 protected-resource doc on the MCP host, which is this same apex), RFC 9727 api-catalog, ai-plugin,
+    UCP, ACP, AAuth, APIs.json at all three spellings, robots.txt and llms.txt - answers HTTP 200 with the 400,958-byte
+    homepage HTML, and the /.well-known/* paths do so under an application/json content-type header, so the status
+    code and header both lie; a negative-control path that cannot exist answers the same way. Those rows carry real_document:
+    false / result: spa-shell and count as misses. The three hits were accepted because their bodies parse as JSON
+    with the expected shape, not because they returned 200. www.grokandmon.com does not resolve (NXDOMAIN), so it
+    serves nothing. The MCP server (/mcp/v1) and A2A endpoint (/a2a/v1) live on the apex, so the MCP-host rows are
+    the apex rows. A WellKnown pointer is emitted because a real document is served; no SecurityTxt pointer (no
+    security.txt).'
+hosts:
+- host: grokandmon.com
+  role: Website, A2A JSON-RPC host, MCP server host and REST (/api/*) host - one origin behind Cloudflare
+  path_echo_control: 'failed (SPA catch-all: every unknown path returns the homepage with HTTP 200)'
+  documents:
+  - path: /.well-known/agent-card.json
+    status: 200
+    content_type: application/json
+    bytes: 6370
+    file: ../a2a/grokandmon-com-agent-card.json
+    standard: A2A Agent Card (protocolVersion 0.3.0)
+    note: Saved verbatim under a2a/ and graded in a2a/grokandmon-com-a2a.yml (conformant).
+  - path: /.well-known/agent.json
+    status: 200
+    content_type: application/json
+    bytes: 2332
+    file: ../a2a/grokandmon-com-agent-card-legacy.json
+    standard: A2A Agent Card, legacy pre-0.3 path
+    note: A DIFFERENT, older card (GanjaMon v0.1.0, 3 skills) - not a copy of the canonical one. Saved verbatim
+      for evidence.
+  - path: /.well-known/x402-pricing.json
+    status: 200
+    content_type: application/json
+    bytes: 3993
+    file: grokandmon-com-x402-pricing.json
+    standard: x402 pricing document (provider-declared, version "x402-v1"; not an IANA-registered well-known name)
+    note: Named by the agent card as x402.pricingUrl. Per-skill USDC prices, art-studio and oracle REST endpoints,
+      supported networks (monad 10143, base 8453) and a 100-requests/day free tier. Read into plans/ and rate-limits/.
+  - path: /.well-known/security.txt
+    status: 200
+    content_type_header: application/json
+    content_type: text/html
+    bytes: 400958
+    real_document: false
+    result: spa-shell
+    note: Returns the homepage HTML shell (<!DOCTYPE html>, title "Grok & Mon - AI-Grown Cannabis on Monad"). Not
+      a document.
+  - path: /security.txt
+    status: 200
+    content_type_header: text/html; charset=utf-8
+    content_type: text/html
+    bytes: 400958
+    real_document: false
+    result: spa-shell
+    note: Returns the homepage HTML shell (<!DOCTYPE html>, title "Grok & Mon - AI-Grown Cannabis on Monad"). Not
+      a document.
+  - path: /.well-known/openid-configuration
+    status: 200
+    content_type_header: application/json
+    content_type: text/html
+    bytes: 400958
+    real_document: false
+    result: spa-shell
+    note: Returns the homepage HTML shell (<!DOCTYPE html>, title "Grok & Mon - AI-Grown Cannabis on Monad"). Not
+      a document.
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    content_type_header: application/json
+    content_type: text/html
+    bytes: 400958
+    real_document: false
+    result: spa-shell
+    note: Returns the homepage HTML shell (<!DOCTYPE html>, title "Grok & Mon - AI-Grown Cannabis on Monad"). Not
+      a document.
+  - path: /.well-known/oauth-protected-resource
+    status: 200
+    content_type_header: application/json
+    content_type: text/html
+    bytes: 400958
+    real_document: false
+    result: spa-shell
+    note: Returns the homepage HTML shell (<!DOCTYPE html>, title "Grok & Mon - AI-Grown Cannabis on Monad"). Not
+      a document.
+  - path: /.well-known/api-catalog
+    status: 200
+    content_type_header: application/json
+    content_type: text/html
+    bytes: 400958
+    real_document: false
+    result: spa-shell
+    note: Returns the homepage HTML shell (<!DOCTYPE html>, title "Grok & Mon - AI-Grown Cannabis on Monad"). Not
+      a document.
+  - path: /.well-known/api-catalog.json
+    status: 200
+    content_type_header: application/json
+    content_type: text/html
+    bytes: 400958
+    real_document: false
+    result: spa-shell
+    note: Returns the homepage HTML shell (<!DOCTYPE html>, title "Grok & Mon - AI-Grown Cannabis on Monad"). Not
+      a document.
+  - path: /.well-known/ai-plugin.json
+    status: 200
+    content_type_header: application/json
+    content_type: text/html
+    bytes: 400958
+    real_document: false
+    result: spa-shell
+    note: Returns the homepage HTML shell (<!DOCTYPE html>, title "Grok & Mon - AI-Grown Cannabis on Monad"). Not
+      a document.
+  - path: /.well-known/ucp.json
+    status: 200
+    content_type_header: application/json
+    content_type: text/html
+    bytes: 400958
+    real_document: false
+    result: spa-shell
+    note: Returns the homepage HTML shell (<!DOCTYPE html>, title "Grok & Mon - AI-Grown Cannabis on Monad"). Not
+      a document.
+  - path: /.well-known/acp.json
+    status: 200
+    content_type_header: application/json
+    content_type: text/html
+    bytes: 400958
+    real_document: false
+    result: spa-shell
+    note: Returns the homepage HTML shell (<!DOCTYPE html>, title "Grok & Mon - AI-Grown Cannabis on Monad"). Not
+      a document.
+  - path: /.well-known/aauth-resource.json
+    status: 200
+    content_type_header: application/json
+    content_type: text/html
+    bytes: 400958
+    real_document: false
+    result: spa-shell
+    note: Returns the homepage HTML shell (<!DOCTYPE html>, title "Grok & Mon - AI-Grown Cannabis on Monad"). Not
+      a document.
+  - path: /.well-known/apis.json
+    status: 200
+    content_type_header: application/json
+    content_type: text/html
+    bytes: 400958
+    real_document: false
+    result: spa-shell
+    note: Returns the homepage HTML shell (<!DOCTYPE html>, title "Grok & Mon - AI-Grown Cannabis on Monad"). Not
+      a document.
+  - path: /apis.json
+    status: 200
+    content_type_header: text/html; charset=utf-8
+    content_type: text/html
+    bytes: 401896
+    real_document: false
+    result: spa-shell
+    note: Returns the homepage HTML shell (<!DOCTYPE html>, title "Grok & Mon - AI-Grown Cannabis on Monad"). Not
+      a document.
+  - path: /apis.yml
+    status: 200
+    content_type_header: text/html; charset=utf-8
+    content_type: text/html
+    bytes: 401896
+    real_document: false
+    result: spa-shell
+    note: Returns the homepage HTML shell (<!DOCTYPE html>, title "Grok & Mon - AI-Grown Cannabis on Monad"). Not
+      a document.
+  - path: /.well-known/mcp.json
+    status: 200
+    content_type_header: application/json
+    content_type: text/html
+    bytes: 400958
+    real_document: false
+    result: spa-shell
+    note: Returns the homepage HTML shell (<!DOCTYPE html>, title "Grok & Mon - AI-Grown Cannabis on Monad"). Not
+      a document.
+  - path: /robots.txt
+    status: 200
+    content_type_header: text/html; charset=utf-8
+    content_type: text/html
+    bytes: 400958
+    real_document: false
+    result: spa-shell
+    note: Returns the homepage HTML shell (<!DOCTYPE html>, title "Grok & Mon - AI-Grown Cannabis on Monad"). Not
+      a document.
+  - path: /llms.txt
+    status: 200
+    content_type_header: text/html; charset=utf-8
+    content_type: text/html
+    bytes: 400958
+    real_document: false
+    result: spa-shell
+    note: Returns the homepage HTML shell (<!DOCTYPE html>, title "Grok & Mon - AI-Grown Cannabis on Monad"). Not
+      a document.
+  - path: /.well-known/grokandmon-negative-control-7f3ab91c.json
+    status: 200
+    content_type_header: application/json
+    content_type: text/html
+    bytes: 400958
+    real_document: false
+    result: spa-shell
+    control: true
+    note: 'Negative control: a path that cannot exist also answers 200 with the shell, proving the catch-all.'
+- host: www.grokandmon.com
+  role: www alias
+  dns: 'NXDOMAIN - curl: (6) Could not resolve host'
+  documents:
+  - path: /.well-known/security.txt
+    status: 0
+    real_document: false
+    result: dns-failure
+    note: Host does not resolve; no request could be made.
+  - path: /.well-known/agent-card.json
+    status: 0
+    real_document: false
+    result: dns-failure

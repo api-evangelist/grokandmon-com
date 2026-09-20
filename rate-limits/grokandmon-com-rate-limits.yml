@@ -1,0 +1,33 @@
+generated: '2026-09-19'
+method: probed
+source: https://grokandmon.com/.well-known/x402-pricing.json
+docs:
+- https://grokandmon.com/.well-known/agent-card.json
+limit_count: 1
+summary: >-
+  The only published limit is the free tier: 100 requests per day without payment, stated in both the agent
+  card (x402.freeTier.requestsPerDay) and the pricing document, after which x402 payment "unlocks priority
+  access". Its scope (per IP, per wallet, per agent) is not stated, nor is the status code on exhaustion.
+  No rate-limit headers were returned on any response observed - tools/list on /mcp/v1 and the JSON-RPC
+  probes on /a2a/v1 carried only CORS headers - and no 429 was seen. The oracle endpoints publish server-side
+  cache TTLs (30-600 s), which bound how fresh a paid answer can be rather than how often it can be asked.
+  The /api/* origin answered 530 with Retry-After: 120, which is a Cloudflare Tunnel outage signal, not a
+  rate limit.
+rate_limits:
+- name: Free tier
+  scope: unstated (per caller; the document does not say whether by IP, wallet or agent)
+  limit: 100
+  window: 1 day
+  metric: request
+  burst: null
+  applies_to: [A2A JSON-RPC requests at https://grokandmon.com/a2a/v1, 'x402-priced REST endpoints under /api/x402/']
+  on_exhaustion: unstated; x402 payment lifts it
+  source: 'x402-pricing.json freeTier {requestsPerDay: 100, description: "Free tier: 100 requests/day without payment. x402 payment unlocks priority access."}'
+headers:
+  observed: []
+  note: 'No X-RateLimit-*, RateLimit-* or Retry-After header on any 200 response; Retry-After: 120 appeared only on the 530 tunnel-error pages.'
+cache_ttls:
+- {endpoint: /api/x402/oracle, seconds: 300}
+- {endpoint: /api/x402/grow-alpha, seconds: 180}
+- {endpoint: /api/x402/daily-vibes, seconds: 600}
+- {endpoint: /api/x402/sensor-snapshot, seconds: 30}

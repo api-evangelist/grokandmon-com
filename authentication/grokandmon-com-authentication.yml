@@ -1,0 +1,52 @@
+generated: '2026-09-19'
+method: probed
+source:
+- https://grokandmon.com/.well-known/agent-card.json
+- https://grokandmon.com/.well-known/agent.json
+- https://grokandmon.com/mcp/v1
+- https://grokandmon.com/a2a/v1
+docs: https://grokandmon.com/a2a.html
+summary:
+  types:
+  - none
+  - x402-payment
+  - apiKey
+  api_key_in:
+  - header
+  oauth2_flows: []
+  note: >-
+    There is no OpenAPI to derive from; this profile is read from the provider's own served documents and
+    observed responses. The canonical agent card declares NO securitySchemes: the gate on the A2A surface
+    is payment, not identity - an x402 micropayment (EIP-3009 USDC transferWithAuthorization) carried in a
+    PAYMENT-SIGNATURE header per a2a.html, with a 100-requests/day free tier per the pricing document. The
+    MCP surface needed no credential for initialize, tools/list or tools/call and issued no session id. The
+    legacy card at /.well-known/agent.json declares an apiKey scheme in the Authorization header, but no
+    page says how such a key is issued and the canonical card dropped it. No OAuth or OIDC discovery
+    document is served.
+schemes:
+- name: anonymous
+  type: none
+  applies_to: ['MCP initialize, tools/list, tools/call', 'GET /a2a/v1', 'GET /a2a/v1/acp/grow, /acp/signals, /acp/oracle', 'POST /a2a/v1 tasks/get and agent/info']
+  observed: 'HTTP 200 with no credential and no WWW-Authenticate on every call made in this pass (2026-09-19).'
+- name: x402
+  type: x402-payment
+  in: header
+  parameter: PAYMENT-SIGNATURE
+  also_allowed_by_cors: [X-Payment, X-402-Payment, X-Payment-Address, X-Payment-Amount, X-Payment-Token, X-Payment-Network]
+  format: EIP-3009 transferWithAuthorization signature for a USDC transfer (CAIP-10 payTo eip155:10143:0x734B0e337bfa7d4764f4B806B4245Dd312DdF134; Base eip155:8453 also listed)
+  purpose: Pay per A2A request (default $0.001 USDC; per-skill prices in the pricing document) beyond the 100/day free tier; unlocks "priority access".
+  scoped: false
+  verified: declared-only - no HTTP 402 challenge was observed; message/send was not exercised
+  sources: [a2a/grokandmon-com-agent-card.json, well-known/grokandmon-com-x402-pricing.json, 'https://grokandmon.com/a2a.html']
+- name: apiKey
+  type: apiKey
+  in: header
+  parameter: Authorization
+  purpose: 'Declared only on the legacy /.well-known/agent.json card (securitySchemes.apiKey, security [{apiKey: []}]); absent from the canonical card; no issuance page exists.'
+  issued_at: not published
+  scoped: false
+  sources: [a2a/grokandmon-com-agent-card-legacy.json]
+discovery:
+  oauth_authorization_server: {url: 'https://grokandmon.com/.well-known/oauth-authorization-server', status: 200, real_document: false, result: spa-shell}
+  oauth_protected_resource: {url: 'https://grokandmon.com/.well-known/oauth-protected-resource', status: 200, real_document: false, result: spa-shell}
+  openid_configuration: {url: 'https://grokandmon.com/.well-known/openid-configuration', status: 200, real_document: false, result: spa-shell}

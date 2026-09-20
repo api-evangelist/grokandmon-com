@@ -1,0 +1,99 @@
+generated: '2026-09-19'
+method: probed
+source: https://grokandmon.com/.well-known/agent-card.json
+docs:
+- https://grokandmon.com/a2a.html
+- https://grokandmon.com/.well-known/x402-pricing.json
+summary: >-
+  Grok & Mon's conformance profile is the agent-commerce protocol stack: an A2A 0.3.0 agent card (graded
+  conformant on shape), an MCP server at protocol version 2025-06-18, JSON-RPC 2.0 on both, x402 USDC
+  micropayments declared on the card and in a pricing document (not exercised), and ERC-8004 on-chain agent
+  registration (agent #4 on Monad, visible on 8004scan.io). It declares no OAuth/OIDC, no RFC 9457 problem
+  details, no RFC 9116 security.txt, no RFC 9727 API catalog, no RFC 8594 sunset signalling, no APIs.json.
+  The domain-standard signature for this market is ERC-8004 + A2A + x402, and the card carries all three
+  in its own fields; the caveat is that a2aregistry.org's task-conformance check against the live endpoint
+  failed (BAD_RESPONSE), so shape conformance and behavioural conformance diverge here.
+standards:
+- id: a2a
+  name: Agent2Agent protocol
+  version: '0.3.0'
+  conforms: true
+  evidence: >-
+    a2a/grokandmon-com-agent-card.json - protocolVersion "0.3.0", url https://grokandmon.com/a2a/v1,
+    preferredTransport JSONRPC, capabilities object, skills[] of 7; POST https://grokandmon.com/a2a/v1
+    tasks/get answered JSON-RPC -32602 Invalid params and an unknown method -32601 with data.available
+    [message/send, tasks/get, tasks/cancel, agent/info]. Graded conformant in a2a/grokandmon-com-a2a.yml.
+  domain_standard_signature: true
+  caveat: a2aregistry.org task_conformance {category BAD_RESPONSE, passed false} on 2026-09-20 - the registry's SDK client could not parse a task response.
+- id: erc-8004
+  name: ERC-8004 Trustless Agents (on-chain agent identity/reputation registry)
+  conforms: true
+  verification: partial
+  evidence: >-
+    The card description opens "The only ERC-8004 agent with roots in the physical world"; x402-pricing.json
+    carries agentId 4; every ACP payload carries protocol "ERC-8004" and metadata.erc8004_agent_id 4; the
+    site links https://8004scan.io/agents/monad/4 (HTTP 200, title "GanjaMon | 8004scan"). The on-chain
+    registration itself was not read from the contract in this pass.
+  domain_standard_signature: true
+- id: mcp
+  name: Model Context Protocol
+  version: '2025-06-18'
+  conforms: true
+  verification: partial
+  evidence: >-
+    POST https://grokandmon.com/mcp/v1 initialize returned protocolVersion "2025-06-18" and capabilities
+    {tools: {listChanged: false}}; tools/list returned 22 tools with inputSchema. Deviations: initialize
+    result puts name/version at top level instead of serverInfo; tools/call answers with an acknowledgement
+    stub rather than executing. See mcp/grokandmon-com-mcp.yml.
+- id: json-rpc-2.0
+  conforms: true
+  evidence: 'Both /mcp/v1 and /a2a/v1 answer {"jsonrpc":"2.0", ...} with standard -32601 Method not found and -32602 Invalid params for the cases probed.'
+- id: x402
+  name: x402 HTTP payment protocol
+  conforms: true
+  verification: partial
+  evidence: >-
+    Card capabilities.x402Payments true and a top-level x402 block (payTo eip155:10143:0x734B...F134, USDC,
+    priceUSD 0.001, pricingUrl); /.well-known/x402-pricing.json version "x402-v1" with per-skill prices and
+    supportedNetworks monad 10143 + base 8453; a2a.html describes EIP-3009 transferWithAuthorization in a
+    PAYMENT-SIGNATURE header; CORS on /a2a/v1 allows X-Payment / X-402-Payment / X-Payment-* headers. No
+    HTTP 402 challenge was observed (message/send was not exercised; the priced /api/x402/* REST paths
+    answered 530), so the payment flow is declared, not verified.
+  domain_standard_signature: true
+- id: eip-3009
+  name: EIP-3009 transferWithAuthorization (gasless USDC transfer)
+  conforms: true
+  verification: declared-only
+  evidence: 'a2a.html "Signature: EIP-3009", payment flow steps 1-5; not exercised.'
+- id: caip-10
+  name: CAIP-10 account addressing
+  conforms: true
+  evidence: payTo values are CAIP-10 strings (eip155:10143:0x..., eip155:8453:0x...) in the card and pricing document; a2a.html says "CAIP-10 addressing".
+- id: oauth2
+  conforms: false
+  evidence: 'No securitySchemes on the canonical card; /.well-known/oauth-authorization-server and /.well-known/oauth-protected-resource return the SPA shell.'
+- id: oidc
+  conforms: false
+  evidence: /.well-known/openid-configuration returns the SPA shell.
+- id: rfc9457
+  name: RFC 9457 Problem Details
+  conforms: false
+  evidence: Errors are JSON-RPC 2.0 error objects; no application/problem+json observed.
+- id: rfc9116
+  name: RFC 9116 security.txt
+  conforms: false
+  evidence: /.well-known/security.txt and /security.txt return the SPA shell.
+- id: rfc9727
+  name: RFC 9727 API catalog
+  conforms: false
+  evidence: /.well-known/api-catalog returns the SPA shell.
+- id: rfc8594
+  name: RFC 8594 Sunset header
+  conforms: false
+  evidence: no Deprecation or Sunset header on any response; no deprecation policy published.
+- id: apis-json
+  conforms: false
+  evidence: /apis.json, /apis.yml and /.well-known/apis.json return the SPA shell.
+- id: openapi
+  conforms: false
+  evidence: /openapi.json, /openapi.yaml, /swagger.json, /api-docs, /docs and /redoc return the SPA shell; /api/openapi.json and /api/docs answered 530.

@@ -1,0 +1,32 @@
+generated: '2026-09-19'
+method: probed
+source:
+- https://grokandmon.com/a2a/v1
+- https://grokandmon.com/mcp/v1
+format: jsonrpc-2.0
+summary: >-
+  No OpenAPI and no error reference are published. Both machine surfaces answer with JSON-RPC 2.0 error
+  objects; the codes below are the ones actually observed on 2026-09-19. Note that unknown-method errors
+  come back with HTTP 404 rather than 200, and that the /api/* REST origin was answering HTTP 530
+  (Cloudflare Tunnel error, an HTML page, Retry-After: 120) for every path, which is infrastructure rather
+  than an API error but is what a caller received.
+problem_types:
+- code: -32601
+  title: Method not found
+  http_status: 404
+  surfaces: [/a2a/v1, /mcp/v1]
+  example: '{"jsonrpc":"2.0","id":3,"error":{"code":-32601,"message":"Method not found: bogus/method","data":{"available":["message/send","tasks/get","tasks/cancel","agent/info"]}}}'
+  remediation: 'On /a2a/v1 read error.data.available for the method list; on /mcp/v1 only tools/list, tools/call and initialize are implemented (resources/list and prompts/list return this).'
+- code: -32602
+  title: Invalid params
+  http_status: 200
+  surfaces: [/a2a/v1]
+  example: '{"jsonrpc":"2.0","id":1,"error":{"code":-32602,"message":"Invalid params: taskId required"}}'
+  remediation: 'tasks/get takes params.taskId (not params.id as A2A 0.3.0 names it - the message says taskId).'
+- code: 530
+  title: Cloudflare Tunnel error (origin unreachable)
+  http_status: 530
+  surfaces: ['/api/*', /brain.html]
+  format: text/html
+  example: 'HTML page titled "Cloudflare Tunnel error | grokandmon.com | Cloudflare", header Retry-After: 120'
+  remediation: 'Infrastructure outage at the origin the MCP tools and ACP endpoints defer to; retry after the stated interval.'
