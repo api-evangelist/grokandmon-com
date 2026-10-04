@@ -57,6 +57,11 @@ apis:
   baseURL: https://grokandmon.com/a2a/v1
   tags:
   - A2A
+  - Agent-Native
+  - x402
+  - ERC-8004
+  tags_raw:
+  - A2A
   - agent-native
   - x402
   - ERC-8004
@@ -83,6 +88,10 @@ apis:
   humanURL: https://grokandmon.com/a2a.html
   baseURL: https://grokandmon.com/mcp/v1
   tags:
+  - MCP
+  - Agent-Native
+  - IoT
+  tags_raw:
   - MCP
   - agent-native
   - IoT
@@ -159,3 +168,10 @@ x-enrichment:
   status: enriched
   artifacts_added: 20
   pass: local-v3
+x-a2a:
+  verified: true
+  probed: '2026-09-26'
+  url: "https://grokandmon.com/.well-known/agent-card.json"
+  grade: "conformant"
+  protocol_version: "0.3.0"
+  control: 200
