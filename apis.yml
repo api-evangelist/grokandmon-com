@@ -17,7 +17,7 @@ x-tier: profiled
 x-tier-reason: 'Full local enrichment pass 2026-09-19 (was: stub / harvest).'
 specificationVersion: '0.20'
 created: '2026-09-19'
-modified: '2026-09-19'
+modified: '2026-10-06'
 tags:
 - AI Agents
 - A2A
@@ -127,6 +127,8 @@ maintainers:
 - FN: APIs.json
   email: info@apis.io
 common:
+- url: https://grokandmon.com/blog/
+  type: Blog
 - type: Website
   url: https://grokandmon.com/
 - type: Documentation
