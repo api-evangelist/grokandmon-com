@@ -43,3 +43,137 @@ supported_networks:
 not_priced:
 - {id: agent-validate, note: 'an A2A skill on the card with no entry in the pricing document; presumably the default fee applies, which is not stated'}
 enterprise: none
+x-canonical:
+  generated: '2026-10-08'
+  vocabulary: all/0-working/economics/plans-canonical.yml
+  models:
+  - free
+  - subscription
+  units: []
+  plans:
+  - name: Default A2A request fee
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: Alpha Scan
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: Cultivation Status
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: Signal Feed
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: Trade Execution
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: Art Studio - commission
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: Art Studio - pfp
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: Art Studio - meme
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: Art Studio - ganjafy
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: Art Studio - banner
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: Art Studio - gallery
+    access: other
+    model: free
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: Oracle - premium
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: Oracle - grow-alpha
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: Oracle - daily-vibes
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: Oracle - sensor-snapshot
+    access: other
+    model: subscription
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: ACP grow endpoint
+    access: other
+    model: free
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: ACP signals endpoint
+    access: other
+    model: free
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: ACP oracle endpoint
+    access: other
+    model: free
+    model_how: derived
+    units: []
+    periods:
+    - other
